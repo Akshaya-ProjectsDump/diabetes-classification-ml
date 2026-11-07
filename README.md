@@ -1,7 +1,7 @@
 # Diabetes Classification Using Machine Learning
 
 ## 1. Project Overview
-This project develops a machine learning-based diabetes classification system using health indicators from the CDC Diabetes Health Indicators dataset.
+This project develops a machine learning-based diabetes classification system using health indicators from the public CDC Diabetes Health Indicators dataset.
 
 The objective is to predict whether an individual is diabetic or non-diabetic based on health-related indicators.
 
