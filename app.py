@@ -19,9 +19,8 @@ from sklearn.metrics import (
     ConfusionMatrixDisplay
 )
 
-# --------------------------------------------------
-# 1. PAGE CONFIGURATION
-# --------------------------------------------------
+
+# PERFORMING THE PAGE CONFIGURATION
 
 st.set_page_config(
     page_title="Diabetes Classification",
@@ -40,29 +39,65 @@ st.info(
     "It is not a medical diagnostic tool."
 )
 
-# --------------------------------------------------
-# 2. LOAD SAVED MODELS AND PREPROCESSOR
-# --------------------------------------------------
+
+# LOADING THE SAVED MODELS AND THE PREPROCESSOR
+
+
+# GitHub Release asset used when knn.pkl is not present in the project folder.
+KNN_MODEL_URL = "https://github.com/Akshaya-ProjectsDump/diabetes-classification-ml/releases/download/v1.0/knn.pkl"
+
 
 @st.cache_resource
 def load_project_files():
 
-    with open("feature_columns.json", "r") as file:
+    # Resolve paths relative to this app.py file, not the terminal's current folder.
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    saved_models_dir = os.path.join(project_dir, "saved_models")
+    os.makedirs(saved_models_dir, exist_ok=True)
+
+    with open(os.path.join(project_dir, "feature_columns.json"), "r") as file:
         feature_columns = json.load(file)
 
-    preprocessor = joblib.load("preprocessor.pkl")
+    preprocessor = joblib.load(os.path.join(project_dir, "preprocessor.pkl"))
 
     model_files = {
-        "Logistic Regression": "saved_models/logistic_regression.pkl",
-        "Decision Tree": "saved_models/decision_tree.pkl",
-        "KNN": "saved_models/knn.pkl",
-        "Naive Bayes": "saved_models/naive_bayes.pkl",
-        "SVM": "saved_models/svm.pkl"
+        "Logistic Regression": os.path.join(saved_models_dir, "logistic_regression.pkl"),
+        "Decision Tree": os.path.join(saved_models_dir, "decision_tree.pkl"),
+        "KNN": os.path.join(saved_models_dir, "knn.pkl"),
+        "Naive Bayes": os.path.join(saved_models_dir, "naive_bayes.pkl"),
+        "SVM": os.path.join(saved_models_dir, "svm.pkl")
     }
+
+    # Downloading the KNN model from the public GitHub Release if it is not stored locally.
+    knn_path = model_files["KNN"]
+    if not os.path.exists(knn_path):
+        try:
+            import urllib.request
+
+            request = urllib.request.Request(
+                KNN_MODEL_URL,
+                headers={"User-Agent": "Diabetes-Classification-Streamlit-App"}
+            )
+            with st.spinner("Downloading the KNN model from GitHub Release..."):
+                with urllib.request.urlopen(request, timeout=180) as response:
+                    with open(knn_path, "wb") as model_file:
+                        model_file.write(response.read())
+        except Exception as download_error:
+            if os.path.exists(knn_path):
+                os.remove(knn_path)
+            raise RuntimeError(
+                "Could not download knn.pkl from the GitHub Release. "
+                "Check that the release is public and the asset link is correct. "
+                f"Details: {download_error}"
+            ) from download_error
 
     models = {}
 
     for model_name, file_path in model_files.items():
+        if not os.path.isfile(file_path):
+            raise FileNotFoundError(
+                f"Required model file is missing: {file_path}"
+            )
         models[model_name] = joblib.load(file_path)
 
     return models, preprocessor, feature_columns
@@ -77,9 +112,7 @@ except Exception as error:
     st.stop()
 
 
-# --------------------------------------------------
-# 3. MODEL SELECTION
-# --------------------------------------------------
+# PERFROMING THE MODEL SELECTION
 
 st.subheader("Select Classification Model")
 
@@ -93,9 +126,8 @@ selected_model = models[selected_model_name]
 st.write("Selected model:", selected_model_name)
 
 
-# --------------------------------------------------
-# 4. CSV FILE UPLOAD
-# --------------------------------------------------
+
+# PERFORMING THE CSV FILE UPLOAD
 
 st.subheader("Upload Dataset")
 
@@ -139,7 +171,7 @@ if uploaded_file is not None:
         # Select features in the exact saved training order
         X = data[feature_columns].copy()
 
-        # Convert input columns to numeric values
+        # Converting input columns to numeric values
         for column in feature_columns:
             X[column] = pd.to_numeric(
                 X[column],
@@ -156,17 +188,16 @@ if uploaded_file is not None:
 
             st.stop()
 
-        # --------------------------------------------------
-        # 6. PREPROCESS INPUT DATA
-        # --------------------------------------------------
-
+      
+        # PREPROCESSING THE INPUT DATA
+        
         X_processed = preprocessor.transform(X)
 
         st.success("Input data preprocessing completed!")
 
-        # --------------------------------------------------
-        # 7. GENERATE PREDICTIONS
-        # --------------------------------------------------
+        
+        #GENERATING THE PREDICTIONS
+        
 
         if st.button("Generate Predictions"):
 
@@ -201,9 +232,9 @@ if uploaded_file is not None:
                 non_diabetic_count
             )
 
-            # --------------------------------------------------
-            # 8. DOWNLOAD PREDICTION RESULTS
-            # --------------------------------------------------
+            
+            # DOWNLOADING THE PREDICTION RESULTS
+            
 
             csv_output = results.to_csv(index=False).encode("utf-8")
 
@@ -214,9 +245,9 @@ if uploaded_file is not None:
                 mime="text/csv"
             )
 
-            # --------------------------------------------------
-            # 9. EVALUATION IF ACTUAL TARGET IS AVAILABLE
-            # --------------------------------------------------
+         
+            # EVALUATING IF ACTUAL TARGET IS AVAILABLE
+           
 
             if has_target:
 
@@ -287,9 +318,9 @@ if uploaded_file is not None:
                     c5.metric("F1 Score", f"{f1:.4f}")
                     c6.metric("MCC", f"{mcc:.4f}")
 
-                    # --------------------------------------------------
-                    # 10. CONFUSION MATRIX
-                    # --------------------------------------------------
+                    
+                    # CONSTRUCTING THE CONFUSION MATRIX
+                    
 
                     st.subheader("Confusion Matrix")
 
@@ -319,9 +350,9 @@ if uploaded_file is not None:
                     st.pyplot(fig)
                     plt.close(fig)
 
-                    # --------------------------------------------------
-                    # 11. CLASSIFICATION REPORT
-                    # --------------------------------------------------
+                    
+                    # CONSTRUCTING THE CLASSIFICATION REPORT
+                   
 
                     st.subheader("Classification Report")
 
