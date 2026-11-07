@@ -52,8 +52,6 @@ def load_project_files():
 
     # Resolve paths relative to this app.py file, not the terminal's current folder.
     project_dir = os.path.dirname(os.path.abspath(__file__))
-    saved_models_dir = os.path.join(project_dir, "saved_models")
-    os.makedirs(saved_models_dir, exist_ok=True)
 
     with open(os.path.join(project_dir, "feature_columns.json"), "r") as file:
         feature_columns = json.load(file)
@@ -61,12 +59,12 @@ def load_project_files():
     preprocessor = joblib.load(os.path.join(project_dir, "preprocessor.pkl"))
 
     model_files = {
-        "Logistic Regression": os.path.join(saved_models_dir, "logistic_regression.pkl"),
-        "Decision Tree": os.path.join(saved_models_dir, "decision_tree.pkl"),
-        "KNN": os.path.join(saved_models_dir, "knn.pkl"),
-        "Naive Bayes": os.path.join(saved_models_dir, "naive_bayes.pkl"),
-        "SVM": os.path.join(saved_models_dir, "svm.pkl")
-    }
+    "Logistic Regression": os.path.join(project_dir, "logistic_regression.pkl"),
+    "Decision Tree": os.path.join(project_dir, "decision_tree.pkl"),
+    "KNN": os.path.join(project_dir, "knn.pkl"),
+    "Naive Bayes": os.path.join(project_dir, "naive_bayes.pkl"),
+    "SVM": os.path.join(project_dir, "svm.pkl")
+}
 
     # Downloading the KNN model from the public GitHub Release if it is not stored locally.
     knn_path = model_files["KNN"]
