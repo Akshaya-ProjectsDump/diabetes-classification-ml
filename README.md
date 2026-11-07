@@ -90,18 +90,44 @@ However, Decision Tree achieved the highest recall, which is an important consid
 
 ## 6. Streamlit Application
 
-**Live Streamlit Application:**  
+**Live Streamlit Application:**
+
 https://cdc-ml-diabetes-classifier.streamlit.app
 
-The interactive application provides the following features:
+The trained diabetes classification models have been deployed using Streamlit Community Cloud. The application provides an interactive interface for exploring the dataset, generating predictions and comparing the performance of five machine learning classification algorithms.
 
-- Upload a diabetes health indicators CSV dataset.
+### Features of the Application
+
+**Dataset Explorer**
+- Upload a CSV file containing diabetes health indicators.
+- Preview uploaded dataset records.
+- View the total number of records and columns.
+- Analyse missing values and duplicate records.
+- View column names, data types and unique values.
+- Visualise the actual target class distribution when target labels are available.
+
+**Diabetes Prediction**
 - Select one of the five trained classification models.
-- Generate diabetes predictions.
+- Generate predictions using the selected model.
 - View predicted diabetic and non-diabetic counts.
+- Visualise prediction distributions.
 - View evaluation metrics when actual target labels are available.
-- View confusion matrices and classification reports.
-- Download prediction results.
+- View the confusion matrix and classification report.
+- Download prediction results as a CSV file.
+
+**Interactive Model Comparison**
+- Evaluate all five trained classification models on the uploaded labelled dataset.
+- Compare Accuracy, AUC, Precision, Recall, F1 Score and Matthews Correlation Coefficient (MCC).
+- Select an evaluation metric for visual comparison.
+- View model-wise prediction distributions.
+- Download the model comparison report.
+
+**ROC Curve Comparison**
+- Visualise ROC curves for the five classification models.
+- Compare their AUC performance.
+- View the no-skill baseline for reference.
+
+The application is intended for academic and educational purposes only and is not a medical diagnostic tool.
 
 ## 7. Project Structure
 
