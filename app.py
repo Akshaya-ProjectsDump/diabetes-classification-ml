@@ -253,59 +253,6 @@ def show_prediction_chart(predictions, title):
     st.bar_chart(chart_data, use_container_width=True)
 
 
-def get_individual_input(feature_name):
-    binary_features = {
-        "HighBP",
-        "HighChol",
-        "CholCheck",
-        "Smoker",
-        "Stroke",
-        "HeartDiseaseorAttack",
-        "PhysActivity",
-        "Fruits",
-        "Veggies",
-        "HvyAlcoholConsump",
-        "AnyHealthcare",
-        "NoDocbcCost",
-        "DiffWalk",
-        "Sex",
-    }
-
-    if feature_name in binary_features:
-        return st.selectbox(
-            feature_name,
-            options=[0, 1],
-            format_func=lambda value: (
-                "No / 0" if value == 0 else "Yes / 1"
-            ),
-            key=f"individual_{feature_name}",
-        )
-
-    ranges = {
-        "BMI": (12, 98, 28),
-        "GenHlth": (1, 5, 3),
-        "MentHlth": (0, 30, 0),
-        "PhysHlth": (0, 30, 0),
-        "Age": (1, 13, 8),
-        "Education": (1, 6, 4),
-        "Income": (1, 8, 5),
-    }
-
-    minimum, maximum, default = ranges.get(
-        feature_name,
-        (0, 100, 0),
-    )
-
-    return st.number_input(
-        feature_name,
-        min_value=minimum,
-        max_value=maximum,
-        value=default,
-        step=1,
-        key=f"individual_{feature_name}",
-    )
-
-
 try:
     models, preprocessor, feature_columns = load_project_files()
 except Exception as error:
@@ -340,12 +287,11 @@ with st.sidebar:
 
 selected_model = models[selected_model_name]
 
-dataset_tab, prediction_tab, comparison_tab, individual_tab = st.tabs(
+dataset_tab, prediction_tab, comparison_tab = st.tabs(
     [
         "📂 Dataset Explorer",
         "🔮 Predictions",
         "📊 Model Comparison",
-        "👤 Individual Prediction",
     ]
 )
 
@@ -895,91 +841,6 @@ with comparison_tab:
                     distribution_table,
                     use_container_width=True,
                 )
-
-with individual_tab:
-    st.header("Individual Health Indicator Prediction")
-
-    st.warning(
-        "This feature is for academic demonstration only. "
-        "It does not diagnose diabetes or replace professional medical advice."
-    )
-
-    st.write(
-        "Enter values for the 21 health indicators to generate one model prediction."
-    )
-
-    individual_model_name = st.selectbox(
-        "Choose a model for individual prediction:",
-        list(models.keys()),
-        key="individual_model_selection",
-    )
-
-    with st.form("individual_prediction_form"):
-        st.subheader("Enter Health Indicator Values")
-
-        entered_values = {}
-        feature_columns_ui = st.columns(3)
-
-        for index, feature_name in enumerate(feature_columns):
-            with feature_columns_ui[index % 3]:
-                entered_values[feature_name] = get_individual_input(
-                    feature_name
-                )
-
-        submitted = st.form_submit_button(
-            "Predict Individual Result",
-            type="primary",
-        )
-
-    if submitted:
-        try:
-            individual_data = pd.DataFrame(
-                [[entered_values[column] for column in feature_columns]],
-                columns=feature_columns,
-            )
-
-            individual_processed = preprocessor.transform(
-                individual_data
-            )
-
-            individual_model = models[individual_model_name]
-            individual_prediction = int(
-                individual_model.predict(individual_processed)[0]
-            )
-
-            if individual_prediction == 1:
-                st.error("Model output: Diabetic (Class 1)")
-            else:
-                st.success("Model output: Non-Diabetic (Class 0)")
-
-            st.caption(f"Model used: {individual_model_name}")
-
-            individual_result = individual_data.copy()
-            individual_result["Predicted_Diabetes"] = (
-                individual_prediction
-            )
-            individual_result["Prediction_Label"] = (
-                "Diabetic"
-                if individual_prediction == 1
-                else "Non-Diabetic"
-            )
-
-            individual_csv = individual_result.to_csv(
-                index=False
-            ).encode("utf-8")
-
-            st.download_button(
-                "Download Individual Prediction",
-                data=individual_csv,
-                file_name="individual_diabetes_prediction.csv",
-                mime="text/csv",
-                key="download_individual_prediction",
-            )
-
-        except Exception as error:
-            st.error(
-                f"Individual prediction failed: {error}"
-            )
 
 st.divider()
 st.caption(
