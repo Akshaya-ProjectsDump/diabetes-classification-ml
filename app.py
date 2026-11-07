@@ -141,14 +141,83 @@ if uploaded_file is not None:
 
         st.success("CSV file uploaded successfully!")
 
-        st.write("Dataset preview:")
-        st.dataframe(data.head())
+# DATASET OVERVIEW
 
-        st.write("Dataset shape:", data.shape)
+st.subheader("Dataset Overview")
 
-        # --------------------------------------------------
-        # 5. VALIDATE INPUT FEATURES
-        # --------------------------------------------------
+# Display important dataset statistics
+total_rows, total_columns = data.shape
+total_missing = int(data.isnull().sum().sum())
+total_duplicates = int(data.duplicated().sum())
+
+col1, col2, col3, col4 = st.columns(4)
+
+col1.metric("Total Records", f"{total_rows:,}")
+col2.metric("Total Features / Columns", total_columns)
+col3.metric("Missing Values", total_missing)
+col4.metric("Duplicate Records", total_duplicates)
+
+# Create interactive tabs
+tab1, tab2, tab3 = st.tabs([
+    "Dataset Preview",
+    "Missing Values",
+    "Column Information"
+])
+
+# TAB 1: Dataset preview
+with tab1:
+
+    st.write("First 10 records of the uploaded dataset:")
+
+    st.dataframe(
+        data.head(10),
+        use_container_width=True
+    )
+
+# TAB 2: Missing value analysis
+with tab2:
+
+    missing_summary = pd.DataFrame({
+        "Column": data.columns,
+        "Missing Values": data.isnull().sum().values,
+        "Missing Percentage": (
+            data.isnull().mean().values * 100
+        ).round(2)
+    })
+
+    missing_summary = missing_summary[
+        missing_summary["Missing Values"] > 0
+    ]
+
+    if missing_summary.empty:
+
+        st.success("No missing values found in the dataset.")
+
+    else:
+
+        st.dataframe(
+            missing_summary,
+            use_container_width=True
+        )
+
+# TAB 3: Column information
+with tab3:
+
+    column_summary = pd.DataFrame({
+        "Column Name": data.columns,
+        "Data Type": data.dtypes.astype(str).values,
+        "Unique Values": data.nunique().values
+    })
+
+    st.dataframe(
+        column_summary,
+        use_container_width=True
+    )
+
+
+        
+        # VALIDATING INPUT FEATURES
+      
 
         has_target = "Diabetes_binary" in data.columns
 
