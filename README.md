@@ -40,9 +40,14 @@ Five classification algorithms are implemented:
 5. Support Vector Machine (SVM)
 
 ## 5. Model Evaluation and Comparison
-The dataset was prepared for binary classification using the Diabetes_binary target variable. The input features were separated from the target variable before model training.
-The preprocessing pipeline was used to prepare the input features for the classification algorithms. The dataset was then divided into training and testing subsets. Five classification algorithms were trained and evaluated using the same evaluation metrics to compare their performance.
+### Training and Preprocessing Methodology
+The dataset was prepared for binary classification using the Diabetes_binary target variable. 
+•	The input features were separated from the target variable before model training.
+•	The preprocessing pipeline was used to prepare the input features for the classification algorithms. 
+•	The dataset was then divided into training and testing subsets at a split ratio of 80% and 20% i.e. 50,736 records and 22 columns, including 21 input features and the target variable out of the original dataset of 253,680 records.
+•	Five classification algorithms were trained and evaluated using the same evaluation metrics to compare their performance.
 The trained models and preprocessing components were saved for reuse in the Streamlit application.
+
 
 The models are evaluated using six performance metrics:
 
